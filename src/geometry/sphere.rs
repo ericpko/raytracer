@@ -5,20 +5,27 @@ use nalgebra as na;
 use na::{ Vector3 };
 
 use crate::scene::Ray;
+use crate::geometry::Object;
+use crate::scene::Material;
 
 
 pub struct Sphere {
    pub center: Vector3<f64>,
    pub radius: f64,
+   pub material: Material
 }
 
 
 impl Sphere {
-   pub fn new(c: &Vector3<f64>, r: f64) -> Sphere {
-      Sphere { center: *c, radius: r }
+   pub fn new(c: &Vector3<f64>, r: f64, mat: Material) -> Sphere {
+      Sphere { center: *c, radius: r, material: mat }
    }
+}
 
-   pub fn intersect(&self, ray: &Ray, min_t: &f64, t: &mut f64, n: &mut Vector3<f64>) -> bool {
+
+impl Object for Sphere {
+   fn intersect(&self, ray: &Ray, min_t: &f64, t: &mut f64, n: &mut Vector3<f64>) -> bool 
+   {
       let mut hit = false;
 
       let c = self.center;
@@ -62,5 +69,10 @@ impl Sphere {
       }
 
       return hit;
+   }
+
+   fn get_material(&self) -> &Material
+   {
+      return &self.material;
    }
 }
