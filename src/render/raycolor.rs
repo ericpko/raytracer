@@ -40,7 +40,7 @@ pub fn raycolor(  ray: &Ray,
    // Get the real intersection point between the viewing ray and the surface
    let e = ray.origin;
    let d = ray.direction;
-   let mray = Ray{origin: e + t * d, direction: reflect(&d.normalize(), &n)};
+   let mray = Ray{origin: e + t * d, direction: reflect(&d.normalize(), &n.normalize())};
 
    // Now we can recursively add to our rgb pixel color. 
    // s = 1e-5 is our fudge factor to move off the surface

@@ -48,26 +48,18 @@ fn main() {
 
          // Shoot a ray and collect the color:
          raycolor(&ray, 1., &objects, &lights, 0, &mut rgb);
-
-         // Check if the ray intersects with the sphere
-         // let mut t = f64::INFINITY;
-         // let mut n: Vector3<f64> = Vector3::new(0., 0., 0.);
-         // for object in &objects {
-         //    if object.intersect(&ray, &1.0, &mut t, &mut n) {
-         //       rgb_image[3 * (j * N_X + i) + 0] = 173u8;
-         //       rgb_image[3 * (j * N_X + i) + 1] = 216u8;
-         //       rgb_image[3 * (j * N_X + i) + 2] = 230u8;
-         //    } else {
-         //       rgb_image[3 * (j * N_X + i) + 0] = 170u8;
-         //       rgb_image[3 * (j * N_X + i) + 1] = 240u8;
-         //       rgb_image[3 * (j * N_X + i) + 2] = 209u8;
-         //    }
-         // }
          
+         // Define an anonymous function (lambda function or closure in Rust)
+         // to clamp the rgb values after adding lights from blinn_phong_shading
+         let clamp = |s: f64| -> f64 {
+            // return 0.0f64.max(s.min(1.0));
+            return f64::max(f64::min(s, 1.0), 0.0);
+         };
+
          // Set the color
-         rgb_image[3 * (j * N_X + i) + 0] = rgb[0] as u8;
-         rgb_image[3 * (j * N_X + i) + 1] = rgb[1] as u8;
-         rgb_image[3 * (j * N_X + i) + 2] = rgb[2] as u8;
+         rgb_image[3 * (j * N_X + i) + 0] = (255.0 * clamp(rgb[0])) as u8;
+         rgb_image[3 * (j * N_X + i) + 1] = (255.0 * clamp(rgb[1])) as u8;
+         rgb_image[3 * (j * N_X + i) + 2] = (255.0 * clamp(rgb[2])) as u8;
       }
    }
 

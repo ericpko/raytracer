@@ -34,14 +34,29 @@ impl Object for Sphere {
 
       let A: f64 = d.dot(&d);
       let B = 2. * d.dot(&(e - c));
-      let C = (e - c).dot(&(e - c)) - self.radius.powf(2.0);
+      let C = (e - c).dot(&(e - c)) - f64::powf(self.radius, 2.0);
 
       let discriminant = B.powf(2.0) - (4. * A * C);
       if discriminant < 0. {
-         // Then there is no solution
-         return false;
+         // Then there is no solution (ray didn't intersect sphere)
+         return hit;
+      // }
+
+      // // If we make it here, then we definitely hit something
+      // hit = true;
+
+      // // Find the smallest value of t (there could be two solutions (if discr < 0)):
+      // let t_plus = (-B + discriminant.sqrt()) / (2. * A);
+      // let t_minus = (-B - discriminant.sqrt()) / (2. * A);
+      // // If t < 0, then ray started inside sphere so clamp t to zero:
+      // *t = f64::max(f64::min(t_plus, t_minus), 0.0);
+
+      // // Set the normal vector at the point of intersection:
+      // *n = ((e + *t * d) - c) / self.radius;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
       
-      } else if discriminant == 0. {
+      } else if discriminant >= -0.00006 && discriminant <= 0.00006 {
          // Then there is one solution
          *t = -B / (2. * A);
          if *t >= *min_t {
@@ -54,18 +69,21 @@ impl Object for Sphere {
          // Then there are two solutions. First calculate t
          let t_plus = (-B + discriminant.sqrt()) / (2. * A);
          let t_minus = (-B - discriminant.sqrt()) / (2. * A);
-         let t_min = t_plus.min(t_minus);
-         let t_max = t_plus.max(t_minus);
+         let t_min = f64::min(t_plus, t_minus);
+         let t_max = f64::max(t_plus, t_min);
 
+         // println!("min_t: {}\nt_min: {}\nt_max: {}", *min_t, t_min, t_max);
          if t_min >= *min_t {
             *t = t_min;
+            hit = true;
          } else if t_max >= *min_t {
             *t = t_max;
+            hit = true;
          }
 
          // Calculate the norm at the closest point of intersection:
          *n = ((e + *t * d) - c) / self.radius;
-         hit = true;
+         // hit = true;
       }
 
       return hit;

@@ -20,7 +20,7 @@ impl Ray {
    {
       // Get the scalar (weights) for the uvw coordinates:
       let u = -(cam.width / 2.0) + (cam.width * (i as f64 + 0.5) / n_x as f64);
-      let v = -(cam.height / 2.0) + (cam.height * (j as f64 + 0.5) / n_y as f64);
+      let v = (cam.height / 2.0) - (cam.height * (j as f64 + 0.5) / n_y as f64);
       let w = -cam.d;
 
       // Find the point <s> of (i, j) in the uvw camera frame coordinates

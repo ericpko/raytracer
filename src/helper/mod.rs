@@ -83,7 +83,7 @@ pub fn setup_camera() -> Camera
    let height = 1.0f64;
    let mut v: Vector3<f64> = Vector3::new(0.0, 1.0, 0.0);
    v.normalize_mut();
-   let mut w: Vector3<f64> = Vector3::new(0.0, 0.0, -1.0);
+   let mut w: Vector3<f64> = -Vector3::new(0.0, 0.0, -1.0);       // double negative?
    w.normalize_mut();
    let u = v.cross(&w);
    let cam = Camera::new(eye, u, v, w, focal_length, width, height);
