@@ -1,5 +1,3 @@
-// use nalgebra as na;
-// use na::{Vector3};
 use std::{
    vec::Vec,
    fs::File,

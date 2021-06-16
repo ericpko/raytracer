@@ -81,11 +81,12 @@ pub fn write_ppm(path: &str, rgb_image: &Vec<u8>, n_x: usize, n_y: usize, nchann
 }
 
 
-pub fn setup_camera() -> Camera
+pub fn setup_camera(n_x: usize, n_y: usize) -> Camera
 {
    let eye = Vector3::new(0.0, 0.0, 5.0);
    let focal_length = 3.0f64;
-   let width: f64 = 1.28;              // n_x / n_y
+   // let width: f64 = 1.28;              // n_x / n_y
+   let width = (n_x as f64) / (n_y as f64);
    let height = 1.0f64;
    let mut v: Vector3<f64> = Vector3::new(0.0, 1.0, 0.0);
    v.normalize_mut();

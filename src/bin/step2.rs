@@ -1,3 +1,15 @@
+/*
+ * This raytracer is *NOT* complete. I was initially following the guide
+ * from tinyraytracer, then decided to implement the raytracer in the main.rs
+ * file. You don't need any file in this bin directory to run the main raytracer.
+ * https://github.com/ssloy/tinyraytracer
+ */
+// for the capital variables
+#![allow(non_snake_case)]
+
+// TODO Remove this line if you want to complete this raytracer.
+#![allow(dead_code, unused_variables, unused_mut, unused_assignments)]
+
 use nalgebra as na;
 use na::{ Vector3, Vector4 };
 

@@ -25,12 +25,12 @@ fn main() {
    const N_Y: usize = 800;       // height
 
    // Lights, camera, ACTION
+   // Setup the Camera:
+   let cam = setup_camera(N_X, N_Y);
    // Create lights:
    let lights = create_lights();
    // Create objects:
    let objects = create_objects();
-   // Setup the Camera:
-   let cam = setup_camera();
 
    // Initialize the image and add a lock so we can iterate in parallel:
    let rgb_image = std::sync::Mutex::new(vec![0u8; 3 * N_X * N_Y]);
