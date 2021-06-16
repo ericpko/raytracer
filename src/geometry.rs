@@ -18,12 +18,11 @@ pub use self::plane::Plane;
 
 use nalgebra as na;
 use na::{ Vector3 };
-use crate::scene::Ray;
-use crate::scene::Material;
+use crate::scene::{ Ray, Material };
 
 
 
 pub trait Object {
-   fn intersect(&self, ray: &Ray, min_t: &f64, t: &mut f64, n: &mut Vector3<f64>) -> bool;
+   fn intersect(&self, ray: &Ray, min_t: f64, t: &mut f64, n: &mut Vector3<f64>) -> bool;
    fn get_material(&self) -> &Material;
 }

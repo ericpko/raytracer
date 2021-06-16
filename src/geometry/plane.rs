@@ -1,9 +1,8 @@
 use nalgebra as na;
 use na::{ Vector3 };
 
-use crate::scene::Ray;
+use crate::scene::{ Ray, Material };
 use crate::geometry::Object;
-use crate::scene::Material;
 
 
 pub struct Plane {
@@ -26,7 +25,7 @@ impl Plane {
 
 impl Object for Plane {
    // Check if ray intersected with plane
-   fn intersect(&self, ray: &Ray, min_t: &f64, t: &mut f64, n: &mut Vector3<f64>) -> bool
+   fn intersect(&self, ray: &Ray, min_t: f64, t: &mut f64, n: &mut Vector3<f64>) -> bool
    {
       let mut hit = false;
 
@@ -34,7 +33,6 @@ impl Object for Plane {
       let p = self.point;
       let e = ray.origin;
       let d = ray.direction;
-
 
       // Check if the direction of the line is perpendicular to the normal of
       // the plane. If this is the case, then the line does not intersect with plane.
@@ -45,7 +43,7 @@ impl Object for Plane {
       // If we make it here, then we know that the ray intersects the plane
       // at some point t
       *t = self.normal.dot(&(p - e)) / self.normal.dot(&d);
-      if *t >= *min_t {
+      if *t >= min_t {
          *n = self.normal;
          hit = true;
       }

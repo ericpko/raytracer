@@ -4,17 +4,16 @@
 use nalgebra as na;
 use na::{ Vector3 };
 
-use crate::scene::Ray;
+use crate::scene::{ Ray, Light };
 use crate::geometry::Object;
-use crate::scene::Light;
 use crate::render::first_hit;
 
 
 pub fn blinn_phong_shading(ray: &Ray, hit_id: usize, t: &f64, n: &Vector3<f64>,
-                           objects: &Vec<Box<dyn Object>>,
-                           lights: &Vec<Box<dyn Light>>) -> Vector3<f64>
+                           objects: &Vec<Box<dyn Object + Sync>>,
+                           lights: &Vec<Box<dyn Light + Sync>>) -> Vector3<f64>
 {
-   // Initialize some variables for readability:
+   // Pull all the variables from this object's material:
    let mat = objects[hit_id].get_material();
    let kd = mat.kd;
    let ks = mat.ks;
@@ -30,15 +29,13 @@ pub fn blinn_phong_shading(ray: &Ray, hit_id: usize, t: &f64, n: &Vector3<f64>,
 
    // Find the point <P> of intersection between the viewing ray and the surface:
    let P = e + *t * d;
-   let mut sray: Ray = Ray{origin: P, direction: Vector3::new(0.,0.,0.)};                      // shadow ray
-   sray.origin = P;
+   let mut sray: Ray = Ray{origin: P, direction: Vector3::new(0.,0.,0.)};       // shadow ray
 
    // Iterate through every light and calculate all the vectors needed
    // to set the pixel color. Since light obeys the superposition principle,
    // we sum all the light, then clip if required:
    let v = (P + -d).normalize();     // v only depends on the viewing ray (not the light source)
    let mut l = Vector3::new(0.,0.,0.);
-   // let mut h = Vector3::new(0.,0.,0.);
    for light in lights.iter() {
       // For each light, find the vectors l, and h, and set the shadow ray direction:
       let mut max_t = 0.;
@@ -47,7 +44,7 @@ pub fn blinn_phong_shading(ray: &Ray, hit_id: usize, t: &f64, n: &Vector3<f64>,
 
       // Now we need to check if we're in a shadow.
       // (i.e. can we see the light source from <P>?)
-      let mut s_hit_id: u32 = 0;
+      let mut s_hit_id: usize = 0;
       let mut s_t: f64 = 0.;
       let mut s_n = Vector3::new(0.,0.,0.);
       if !first_hit(&sray, 1.0e-6, objects, &mut s_hit_id, &mut s_t, &mut s_n) || s_t >= max_t {

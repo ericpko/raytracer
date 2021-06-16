@@ -10,3 +10,4 @@ default-run = "raytracer"
 
 [dependencies]
 nalgebra = "0.27"
+rayon = "1.5"

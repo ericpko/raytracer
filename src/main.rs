@@ -1,5 +1,6 @@
 use nalgebra as na;
 use na::{ Vector3 };
+use rayon::prelude::*;
 
 
 mod scene;
@@ -23,9 +24,6 @@ fn main() {
    const N_X: usize = 1024;      // width
    const N_Y: usize = 800;       // height
 
-   // Initialize the image:
-   let mut rgb_image: Vec<u8> = vec![0; 3 * N_X * N_Y];
-
    // Lights, camera, ACTION
    // Create lights:
    let lights = create_lights();
@@ -34,9 +32,14 @@ fn main() {
    // Setup the Camera:
    let cam = setup_camera();
 
-   // TODO: parallelize
+   // Initialize the image and add a lock so we can iterate in parallel:
+   let rgb_image = std::sync::Mutex::new(vec![0u8; 3 * N_X * N_Y]);
+
+   
    // Iterate over each pixel (i, j) = (x, y) = (col, row):
-   for j in 0..N_Y 
+   // Outter for loop is parallelized
+   (0..N_Y).into_par_iter().for_each(|j|
+   // for j in 0..N_Y 
    {
       for i in 0..N_X 
       {
@@ -57,12 +60,14 @@ fn main() {
          };
 
          // Set the color
+         let mut rgb_image = rgb_image.lock().unwrap();
          rgb_image[3 * (j * N_X + i) + 0] = (255.0 * clamp(rgb[0])) as u8;
          rgb_image[3 * (j * N_X + i) + 1] = (255.0 * clamp(rgb[1])) as u8;
          rgb_image[3 * (j * N_X + i) + 2] = (255.0 * clamp(rgb[2])) as u8;
       }
-   }
+   }); 
 
 
+   let rgb_image = rgb_image.lock().unwrap();
    write_ppm("rgb.ppm", &rgb_image, N_X, N_Y, 3);
 }

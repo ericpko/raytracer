@@ -9,14 +9,20 @@ use std::{
 use nalgebra as na;
 use na::{ Vector3 };
 
-use crate::scene::Camera;
-use crate::scene::Light;
-use crate::scene::PointLight;
-use crate::scene::DirectionalLight;
-use crate::scene::Material;
-use crate::geometry::Object;
-use crate::geometry::Sphere;
-use crate::geometry::Plane;
+use crate::scene::{ 
+   Camera,
+   Light,
+   PointLight,
+   DirectionalLight,
+   Material
+};
+
+use crate::geometry::{
+   Object,
+   Sphere,
+   Plane
+};
+
 
 
 /**
@@ -83,7 +89,7 @@ pub fn setup_camera() -> Camera
    let height = 1.0f64;
    let mut v: Vector3<f64> = Vector3::new(0.0, 1.0, 0.0);
    v.normalize_mut();
-   let mut w: Vector3<f64> = -Vector3::new(0.0, 0.0, -1.0);       // double negative?
+   let mut w: Vector3<f64> = -Vector3::new(0.0, 0.0, -1.0);       // double negative
    w.normalize_mut();
    let u = v.cross(&w);
    let cam = Camera::new(eye, u, v, w, focal_length, width, height);
@@ -91,14 +97,14 @@ pub fn setup_camera() -> Camera
    return cam;
 }
 
-pub fn create_objects() -> std::vec::Vec<Box<dyn Object>>
+pub fn create_objects() -> std::vec::Vec<Box<dyn Object + Sync>>
 {
-   let orange_pastic = Material::new(
-      Vector3::new(1., 0.7, 0.2),
-      Vector3::new(1., 0.7, 0.2),
+   let pink_pastic = Material::new(
+      Vector3::new(1., 0.412, 0.706),
+      Vector3::new(1., 0.412, 0.706),
       Vector3::new(0.8, 0.8, 0.8),
       Vector3::new(0.05, 0.05, 0.05),
-      1000.0
+      500.0
    );
    let lambertian_blue = Material::new(
       Vector3::new(0.2, 0.3, 0.8),
@@ -108,10 +114,10 @@ pub fn create_objects() -> std::vec::Vec<Box<dyn Object>>
       20.0
    );
 
-   let sphere = Sphere::new(&Vector3::new(0.0, 0.0, 0.0), 0.5, orange_pastic);
+   let sphere = Sphere::new(&Vector3::new(0.0, 0.0, 0.0), 0.5, pink_pastic);
    let plane = Plane::new(&Vector3::new(0., -0.5, 0.), &Vector3::new(0., 1., 0.), lambertian_blue);
 
-   let mut objects: Vec<Box<dyn Object>> = Vec::new();
+   let mut objects: Vec<Box<dyn Object + Sync>> = Vec::new();
    objects.push(Box::new(sphere));
    objects.push(Box::new(plane));
 
@@ -119,7 +125,7 @@ pub fn create_objects() -> std::vec::Vec<Box<dyn Object>>
 }
 
 
-pub fn create_lights() -> Vec<Box<dyn Light>>
+pub fn create_lights() -> Vec<Box<dyn Light + Sync>>
 {
    let color = Vector3::new(0.8, 0.8, 0.8);
 
@@ -129,7 +135,7 @@ pub fn create_lights() -> Vec<Box<dyn Light>>
    dir.normalize_mut();
    let directionallight = DirectionalLight::new(color, dir);
 
-   let mut lights: Vec<Box<dyn Light>> = Vec::new();
+   let mut lights: Vec<Box<dyn Light + Sync>> = Vec::new();
    lights.push(Box::new(pointlight));
    lights.push(Box::new(directionallight));
 
