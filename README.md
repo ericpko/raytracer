@@ -5,7 +5,7 @@ I made a tiny rayracer as a way to learn Rust. This raytracer comes from the [Co
 - Clone the git repo https://github.com/ericpko/raytracer.git
 - cd into the repo, then run the following commands:
 - cargo build --release
-- cargo run --release ./data/<json-filename>.json
+- cargo run --release ./data/\<json-filename\>.json
 
 After you execute the raytracer, you will see the images created in the `images` folder. You can also create your own JSON file and set up your own scene to render using geometric primitives such as spheres, planes, and triangles!
 
