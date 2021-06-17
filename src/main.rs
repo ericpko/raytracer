@@ -4,13 +4,13 @@ use rayon::prelude::*;
 
 
 mod scene;
-use scene::Camera;
-use scene::Ray;
+use scene::{ Camera, Ray, Light };
 
 mod helper;
-use helper::{ write_ppm, setup_camera, create_objects, create_lights };
+use helper::{ write_ppm, setup_scene };
 
 mod geometry;
+use geometry::Object;
 
 mod render;
 use render::raycolor;
@@ -18,19 +18,36 @@ use render::raycolor;
 
 
 fn main() {
-   println!("This is main.rs.\nTo run a step from raytracer, use:\ncargo run --bin <step>");
+   println!("This is main.rs.\nTo run a step from raytracer, use:\ncargo run --bin <step>\n");
+
+   // Parse command line arguments:
+   let args: Vec<String> = std::env::args().collect();
+   
+   let mut path = "./data/sphere-and-plane.json";      // default path
+   match args.len() {
+      2 => {
+         path = &args[1];
+      }
+      _ => {
+         println!("No path given, incorrect path, or too many args. Running on default path \
+         \"/data/sphere-and-plane.json\"\n");
+         println!("=======> To run raytracer, type: <=======\n\
+         >>> cargo run ./data/<json-file-name>.json");
+      }
+   }
+   let file = std::fs::File::open(path).expect("Error opening file");
+   let json: serde_json::Value = serde_json::from_reader(file).expect("Error: Check JSON format.");
+
 
    // Set the image width and height in pixels:
    const N_X: usize = 1024;      // width
    const N_Y: usize = 800;       // height
 
-   // Lights, camera, ACTION
-   // Setup the Camera:
-   let cam = setup_camera(N_X, N_Y);
-   // Create lights:
-   let lights = create_lights();
-   // Create objects:
-   let objects = create_objects();
+   // Set up the scene:
+   let mut cam = Camera::default();
+   let mut lights: Vec<Box<dyn Light + Sync>> = Vec::default();
+   let mut objects: Vec<Box<dyn Object + Sync>> = Vec::default();
+   setup_scene(N_X, N_Y, &json, &mut cam, &mut lights, &mut objects);
 
    // Initialize the image and add a lock so we can iterate in parallel:
    let rgb_image = std::sync::Mutex::new(vec![0u8; 3 * N_X * N_Y]);
@@ -67,7 +84,7 @@ fn main() {
       }
    }); 
 
-
+   let img_path = &path[7..path.len()-5];       // ./data/file-name.json ===> file-name
    let rgb_image = rgb_image.lock().unwrap();
-   write_ppm("rgb.ppm", &rgb_image, N_X, N_Y, 3);
+   write_ppm(format!("{}.ppm", img_path).as_str(), &rgb_image, N_X, N_Y, 3);
 }

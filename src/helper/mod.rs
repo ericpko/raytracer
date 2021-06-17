@@ -8,6 +8,7 @@ use std::{
 };
 use nalgebra as na;
 use na::{ Vector3 };
+use serde_json::Value;
 
 use crate::scene::{ 
    Camera,
@@ -81,64 +82,86 @@ pub fn write_ppm(path: &str, rgb_image: &Vec<u8>, n_x: usize, n_y: usize, nchann
 }
 
 
-pub fn setup_camera(n_x: usize, n_y: usize) -> Camera
+pub fn setup_camera(n_x: usize, n_y: usize, json: &Value, cam: &mut Camera)
 {
-   let eye = Vector3::new(0.0, 0.0, 5.0);
-   let focal_length = 3.0f64;
-   // let width: f64 = 1.28;              // n_x / n_y
+   let cam_json = json.get("camera").unwrap();
+   // let arr: Vec<f64> = cam_json["eye"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect();
+   let eye: Vector3<f64> = Vector3::from_vec(cam_json["eye"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+   let focal_length = cam_json["focal_length"].as_f64().unwrap();
+
    let width = (n_x as f64) / (n_y as f64);
    let height = 1.0f64;
-   let mut v: Vector3<f64> = Vector3::new(0.0, 1.0, 0.0);
-   v.normalize_mut();
-   let mut w: Vector3<f64> = -Vector3::new(0.0, 0.0, -1.0);       // double negative
-   w.normalize_mut();
+
+   let v: Vector3<f64> = Vector3::from_vec(cam_json["up"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect()).normalize();
+   let w: Vector3<f64> = -Vector3::from_vec(cam_json["look"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect()).normalize();
    let u = v.cross(&w);
-   let cam = Camera::new(eye, u, v, w, focal_length, width, height);
 
-   return cam;
+   *cam = Camera::new(eye, u, v, w, focal_length, width, height);
 }
 
-pub fn create_objects() -> std::vec::Vec<Box<dyn Object + Sync>>
+pub fn setup_objects(json: &Value, objects: &mut Vec<Box<dyn Object + Sync>>)
 {
-   let pink_pastic = Material::new(
-      Vector3::new(1., 0.412, 0.706),
-      Vector3::new(1., 0.412, 0.706),
-      Vector3::new(0.8, 0.8, 0.8),
-      Vector3::new(0.05, 0.05, 0.05),
-      500.0
-   );
-   let lambertian_blue = Material::new(
-      Vector3::new(0.2, 0.3, 0.8),
-      Vector3::new(0.2, 0.3, 0.8),
-      Vector3::new(0.1, 0.1, 0.1),
-      Vector3::new(0.3, 0.3, 0.3),
-      20.0
-   );
+   let objects_json = json.get("objects").unwrap().as_array().unwrap();
+   let mats_json = json.get("materials").unwrap().as_array().unwrap().to_vec();
+   // let materials: Vec<Material> = Vec::default();
 
-   let sphere = Sphere::new(&Vector3::new(0.0, 0.0, 0.0), 0.5, pink_pastic);
-   let plane = Plane::new(&Vector3::new(0., -0.5, 0.), &Vector3::new(0., 1., 0.), lambertian_blue);
+   for i in 0..objects_json.len() {
+      if objects_json[i]["type"].as_str().unwrap() == "sphere" {
+         let mat_name = objects_json[i]["material"].as_str().unwrap();
+         let mat_idx = mats_json.iter().position(|j| j["name"].as_str().unwrap() == mat_name).unwrap();
+         let ka: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ka"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let kd: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["kd"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let ks: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ks"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let km: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["km"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let phong_exp = mats_json[mat_idx]["phong_exponent"].as_f64().unwrap();
+         
+         let mat = Material::new(ka, kd, ks, km, phong_exp);
 
-   let mut objects: Vec<Box<dyn Object + Sync>> = Vec::new();
-   objects.push(Box::new(sphere));
-   objects.push(Box::new(plane));
+         let center: Vector3<f64> = Vector3::from_vec(objects_json[i]["center"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let radius: f64 = objects_json[i]["radius"].as_f64().unwrap();
+         objects.push(Box::new(Sphere::new(&center, radius, mat)));
+      
+      } else if objects_json[i]["type"].as_str().unwrap() == "plane" {
+         let mat_name = objects_json[i]["material"].as_str().unwrap();
+         let mat_idx = mats_json.iter().position(|j| j["name"].as_str().unwrap() == mat_name).unwrap();
+         let ka: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ka"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let kd: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["kd"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let ks: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ks"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let km: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["km"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let phong_exp = mats_json[mat_idx]["phong_exponent"].as_f64().unwrap();
+         
+         let mat = Material::new(ka, kd, ks, km, phong_exp);
 
-   return objects;
+         let point: Vector3<f64> = Vector3::from_vec(objects_json[i]["point"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let normal: Vector3<f64> = Vector3::from_vec(objects_json[i]["normal"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect()).normalize();
+         objects.push(Box::new(Plane::new(&point, &normal, mat)));
+      }
+   }
 }
 
 
-pub fn create_lights() -> Vec<Box<dyn Light + Sync>>
+pub fn setup_lights(json: &Value, lights: &mut Vec<Box<dyn Light + Sync>>)
 {
-   let color = Vector3::new(0.8, 0.8, 0.8);
+   let lights_json = json.get("lights").unwrap().as_array().unwrap();
 
-   let pointlight = PointLight::new(color, Vector3::new(-10., 20., 10.));
+   for i in 0..lights_json.len() {
+      if lights_json[i]["type"].as_str().unwrap() == "directional" {
+         let dir: Vector3<f64> = Vector3::from_vec(lights_json[i]["direction"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect()).normalize();
+         let color: Vector3<f64> = Vector3::from_vec(lights_json[i]["color"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         lights.push(Box::new(DirectionalLight::new(color, dir)));
+      
+      } else if lights_json[i]["type"].as_str().unwrap() == "point" {
+         let pos: Vector3<f64> = Vector3::from_vec(lights_json[i]["position"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let color: Vector3<f64> = Vector3::from_vec(lights_json[i]["color"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         lights.push(Box::new(PointLight::new(color, pos)));
+      }
+   }
+}
 
-   let mut dir = Vector3::new(0., 0., -1.);
-   dir.normalize_mut();
-   let directionallight = DirectionalLight::new(color, dir);
 
-   let mut lights: Vec<Box<dyn Light + Sync>> = Vec::new();
-   lights.push(Box::new(pointlight));
-   lights.push(Box::new(directionallight));
-
-   return lights;
+pub fn setup_scene(n_x: usize, n_y: usize, json: &Value, cam: &mut Camera, lights: &mut Vec<Box<dyn Light + Sync>>, objects: &mut Vec<Box<dyn Object + Sync>>)
+{
+   setup_camera(n_x, n_y, json, cam);
+   setup_lights(json, lights);
+   setup_objects(json, objects);
 }

@@ -2,6 +2,7 @@ use nalgebra as na;
 use na::{ Vector3 };
 
 
+#[derive(Default)]
 pub struct Camera {
    // Origin or "eye"
    pub e: Vector3<f64>,
