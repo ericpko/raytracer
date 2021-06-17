@@ -1,7 +1,7 @@
 {
    "camera": {
       "type": "perspective",
-      "focal_length": 1,
+      "focal_length": 0.65,
       "eye": [
          10,
          10,

@@ -14,6 +14,12 @@ pub use self::sphere::Sphere;
 pub mod plane;
 pub use self::plane::Plane;
 
+pub mod triangle;
+pub use self::triangle::Triangle;
+
+// pub mod trianglesoup;
+// pub use self::trianglesoup::TriangleSoup;
+
 
 
 use nalgebra as na;

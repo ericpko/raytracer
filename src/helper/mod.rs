@@ -1,3 +1,6 @@
+// for the capital letters
+#![allow(non_snake_case)]
+
 /**
  * This is the helper module.
  */
@@ -21,7 +24,8 @@ use crate::scene::{
 use crate::geometry::{
    Object,
    Sphere,
-   Plane
+   Plane,
+   Triangle
 };
 
 
@@ -99,11 +103,12 @@ pub fn setup_camera(n_x: usize, n_y: usize, json: &Value, cam: &mut Camera)
    *cam = Camera::new(eye, u, v, w, focal_length, width, height);
 }
 
+
+// TODO: Could definitely add a function that returns a material to eliminate the duplicate code for each geometric primative
 pub fn setup_objects(json: &Value, objects: &mut Vec<Box<dyn Object + Sync>>)
 {
    let objects_json = json.get("objects").unwrap().as_array().unwrap();
    let mats_json = json.get("materials").unwrap().as_array().unwrap().to_vec();
-   // let materials: Vec<Material> = Vec::default();
 
    for i in 0..objects_json.len() {
       if objects_json[i]["type"].as_str().unwrap() == "sphere" {
@@ -135,6 +140,23 @@ pub fn setup_objects(json: &Value, objects: &mut Vec<Box<dyn Object + Sync>>)
          let point: Vector3<f64> = Vector3::from_vec(objects_json[i]["point"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
          let normal: Vector3<f64> = Vector3::from_vec(objects_json[i]["normal"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect()).normalize();
          objects.push(Box::new(Plane::new(&point, &normal, mat)));
+      
+      } else if objects_json[i]["type"].as_str().unwrap() == "triangle" {
+         let mat_name = objects_json[i]["material"].as_str().unwrap();
+         let mat_idx = mats_json.iter().position(|j| j["name"].as_str().unwrap() == mat_name).unwrap();
+         let ka: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ka"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let kd: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["kd"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let ks: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["ks"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let km: Vector3<f64> = Vector3::from_vec(mats_json[mat_idx]["km"].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let phong_exp = mats_json[mat_idx]["phong_exponent"].as_f64().unwrap();
+
+         let mat = Material::new(ka, kd, ks, km, phong_exp);
+
+         let P = Vector3::from_vec(objects_json[i]["corners"][0].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let Q = Vector3::from_vec(objects_json[i]["corners"][1].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let R = Vector3::from_vec(objects_json[i]["corners"][2].as_array().unwrap().to_vec().iter().map(|x| x.as_f64().unwrap()).collect());
+         let corners = (P, Q, R);
+         objects.push(Box::new(Triangle::new(corners, mat)));
       }
    }
 }
