@@ -21,7 +21,7 @@ fn render() {
    }
 
    // Write to ppm file:
-   let f = File::create("step1.ppm").expect("Something went wrong creating step1.ppm");
+   let f = File::create("./images/step1.ppm").expect("Something went wrong creating step1.ppm");
    let mut stream = BufWriter::new(&f);
    let header = format!("P6\n{} {}\n255\n", WIDTH, HEIGHT);
    stream.write(header.as_bytes()).expect("Problem writing header.");

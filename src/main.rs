@@ -87,5 +87,5 @@ fn main() {
 
    let img_path = &path[7..path.len()-5];       // ./data/file-name.json ===> file-name
    let rgb_image = rgb_image.lock().unwrap();
-   write_ppm(format!("{}.ppm", img_path).as_str(), &rgb_image, N_X, N_Y, 3);
+   write_ppm(format!("./images/{}.ppm", img_path).as_str(), &rgb_image, N_X, N_Y, 3);
 }
