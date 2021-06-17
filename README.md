@@ -13,7 +13,7 @@ After you execute the raytracer, you will see the images created in the `images`
 Here are some cool images you can create with this raytracer!
 <img src="readme-png/creative.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
 <img src="readme-png/sphere-and-plane.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
-<img src="readme-png/two-spheres-and-plane.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
 <img src="readme-png/sphere-packing.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
+<img src="readme-png/two-spheres-and-plane.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
 <img src="readme-png/sphere-small-change.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
 <img src="readme-png/sphere-large-change.png" class="img-responsive" alt="Sphere and plane" width="640" height="500"> </div>
