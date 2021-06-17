@@ -1,11 +1,8 @@
 # raytracer
-A tiny rayracer written in Rust
+I made a tiny rayracer as a way to learn Rust. 
 
 
 
-<!-- ![alt text][sphere-and-plane]
-[sphere-and-plane]: /readme-png/sphere-and-plane.png?raw=true "Sphere and plane" -->
 
-<!-- ![image](https://raw.github.com/ericpko/raytracer/main/readme-png/sphere-and-plane.png) -->
 
-<img src="readme-png/sphere-and-plane.png" class="img-responsive" alt=""> </div>
+<img src="readme-png/sphere-and-plane.png" class="img-responsive" alt="Sphere and plane" width="500" height="600"> </div>
