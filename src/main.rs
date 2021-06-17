@@ -18,7 +18,7 @@ use render::raycolor;
 
 
 fn main() {
-   println!("This is main.rs.\nTo run a step from raytracer, use:\ncargo run --bin <step>\n");
+   // println!("This is main.rs.\nTo run a step from raytracer, use:\ncargo run --bin <step>\n");
 
    // Parse command line arguments:
    let args: Vec<String> = std::env::args().collect();
@@ -29,13 +29,14 @@ fn main() {
          path = &args[1];
       }
       _ => {
-         println!("No path given, incorrect path, or too many args. Running on default path \
+         println!("No path given, or too many args. Running on default path \
          \"/data/sphere-and-plane.json\"\n");
          println!("=======> To run raytracer, type: <=======\n\
-         >>> cargo run ./data/<json-file-name>.json");
+         >>> cargo run --release ./data/<json-file-name>.json");
       }
    }
-   let file = std::fs::File::open(path).expect("Error opening file");
+   let file = std::fs::File::open(path).expect("Invalid path given. Try\n\
+   >>> cargo run --release ./data/<json-file-name>.json\n\n");
    let json: serde_json::Value = serde_json::from_reader(file).expect("Error: Check JSON format.");
 
 
